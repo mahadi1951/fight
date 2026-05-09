@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import MyContainer from "../Components/MyContainer";
 import { Link } from "react-router-dom";
 import { IoEyeOff } from "react-icons/io5";
@@ -6,6 +6,7 @@ import { FaEye } from "react-icons/fa";
 import {
   GithubAuthProvider,
   GoogleAuthProvider,
+  sendPasswordResetEmail,
   signInWithEmailAndPassword,
   signInWithPopup,
   signOut,
@@ -17,12 +18,13 @@ const googleProvider = new GoogleAuthProvider();
 const githubProvider = new GithubAuthProvider();
 
 const Signin = () => {
+  const emailRef = useRef();
   const [user, setUser] = useState(null);
   const [show, setShow] = useState(false);
   const handleSignin = (e) => {
     e.preventDefault();
     const form = e.target;
-    const email = form.email.value;
+    const email = emailRef.current.value;
     const password = form.password.value;
     console.log("Signin with:", { email, password });
     signInWithEmailAndPassword(auth, email, password)
@@ -63,7 +65,30 @@ const Signin = () => {
       });
   };
 
-  const handleForgetPassword = () => {};
+  const handleForgetPassword = (email) => {
+    if (!email) {
+      toast.error("Please enter your email first");
+      return;
+    }
+
+    sendPasswordResetEmail(auth, email)
+      .then(() => {
+        toast.success("Password reset email sent! 📧");
+      })
+      .catch((err) => {
+        console.log(err.code);
+
+        if (err.code === "auth/user-not-found") {
+          toast.error("এই email দিয়ে কোনো account নেই");
+        } else if (err.code === "auth/invalid-email") {
+          toast.error("Invalid email address");
+        } else if (err.code === "auth/network-request-failed") {
+          toast.error("Network problem, আবার চেষ্টা করো");
+        } else {
+          toast.error(err.message);
+        }
+      });
+  };
   const handleSignOut = () => {
     signOut(auth)
       .then(() => {
@@ -130,6 +155,7 @@ const Signin = () => {
                   <input
                     type="email"
                     name="email"
+                    ref={emailRef}
                     // value={email}
                     // onChange={(e) => setEmail(e.target.value)}
                     placeholder="example@email.com"
@@ -154,9 +180,9 @@ const Signin = () => {
                 </div>
 
                 <button
-                  className="hover:underline cursor-pointer"
-                  onClick={handleForgetPassword}
                   type="button"
+                  onClick={() => handleForgetPassword(emailRef.current.value)}
+                  className="hover:underline cursor-pointer"
                 >
                   Forget password?
                 </button>

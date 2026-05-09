@@ -1,7 +1,10 @@
 import React from "react";
 import MyContainer from "../Components/MyContainer";
 import { Link } from "react-router-dom";
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import {
+  createUserWithEmailAndPassword,
+  sendPasswordResetEmail,
+} from "firebase/auth";
 import { auth } from "../Firebase/firebase.config";
 import { toast } from "react-toastify";
 import { useState } from "react";
@@ -96,8 +99,6 @@ const Signup = () => {
   const handleGoogleSignin = () => {};
 
   const handleGithubSignin = () => {};
-
-  const handleForgetPassword = () => {};
 
   // console.log();
 
